@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-ink-700;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 text-ink-100 font-sans antialiased;
+    background-image:
+      radial-gradient(1100px 620px at 12% -8%, rgba(124, 92, 255, 0.16), transparent 62%),
+      radial-gradient(900px 520px at 92% 4%, rgba(255, 92, 71, 0.08), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  /* Visible focus for keyboard users on every interactive element. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-ink-950;
+  }
+
+  ::selection {
+    @apply bg-accent/40 text-white;
+  }
+
+  /* Scrollbars that suit a dark UI. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-ink-700;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ink-600;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-ink-700/80 bg-ink-850/70 backdrop-blur-xl;
+  }
+
+  .panel-hover {
+    @apply transition-all duration-300 hover:border-ink-600 hover:bg-ink-800/70;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+           transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent text-white shadow-lg shadow-accent/25 hover:bg-accent-soft hover:shadow-accent/40
+           active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply btn border border-ink-700 bg-ink-800/60 text-ink-100 hover:border-ink-600 hover:bg-ink-750
+           active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn text-ink-300 hover:bg-ink-800 hover:text-ink-100;
+  }
+
+  .btn-danger {
+    @apply btn border border-ember/40 bg-ember/10 text-ember hover:bg-ember/20;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-ink-700 bg-ink-900/80 px-3.5 py-2.5 text-sm text-ink-100
+           placeholder:text-ink-400 transition-colors focus:border-accent focus:outline-none
+           focus:ring-1 focus:ring-accent;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-300;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-ink-700 bg-ink-800/70 px-2.5 py-1
+           text-[11px] font-semibold text-ink-200;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-gradient-to-r from-ink-800 via-ink-750 to-ink-800 bg-[length:200%_100%];
+  }
+
+  /* Screen-reader-only text for accessible icon-only controls. */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-accent-gradient bg-clip-text text-transparent;
+  }
+
+  .grid-cards {
+    @apply grid gap-4 sm:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

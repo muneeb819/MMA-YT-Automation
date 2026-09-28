@@ -34,9 +34,22 @@ foreach ($key in $patterns.Keys) {
     }
 }
 
-# Also flag any non-example .env file.
+# A real .env file on disk is expected and fine — what matters is whether git
+# TRACKS it (it is gitignored, so it must never be committed).
 $envFiles = Get-ChildItem -Recurse -File -Force -Path $root -Filter '.env*' -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -notmatch 'node_modules' -and $_.Name -ne '.env.example' }
+
+$trackedEnv = @()
+if (Get-Command git -ErrorAction SilentlyContinue) {
+    Push-Location $root
+    try {
+        $trackedEnv = @(& git ls-files | Where-Object { $_ -match '(^|/)\.env' -and $_ -ne '.env.example' })
+    } catch {
+        $trackedEnv = @()
+    } finally {
+        Pop-Location
+    }
+}
 
 Write-Host ""
 if ($found.Count -gt 0) {
@@ -44,13 +57,18 @@ if ($found.Count -gt 0) {
     $found | Format-Table -AutoSize | Out-String | Write-Host
     exit 1
 }
-if ($envFiles.Count -gt 0) {
-    Write-Host "FAIL: real .env file(s) present:" -ForegroundColor Red
-    $envFiles | ForEach-Object { Write-Host "   $($_.FullName)" }
+if ($trackedEnv.Count -gt 0) {
+    Write-Host "FAIL: real .env file(s) are TRACKED by git:" -ForegroundColor Red
+    $trackedEnv | ForEach-Object { Write-Host "   $_" }
     exit 1
 }
 
-Write-Host "PASS: no live credentials detected" -ForegroundColor Green
-Write-Host "PASS: no real .env files present (only .env.example with placeholders)" -ForegroundColor Green
+Write-Host "PASS: no live credentials detected in committable files" -ForegroundColor Green
+if ($envFiles.Count -gt 0) {
+    $names = ($envFiles | ForEach-Object { Split-Path $_.FullName -Leaf }) -join ', '
+    Write-Host "PASS: local env file(s) present but gitignored and untracked ($names)" -ForegroundColor Green
+} else {
+    Write-Host "PASS: no local .env files present" -ForegroundColor Green
+}
 Write-Host "PASS: $($files.Count) files cleared for a public repository" -ForegroundColor Green
 exit 0

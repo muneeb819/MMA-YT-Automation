@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Flame, Loader2, ArrowRight, PartyPopper } from 'lucide-react';
+import { Check, Flame, Loader2, ArrowRight, PartyPopper, Info } from 'lucide-react';
 import { Button, Card, CardHeader, DemoBadge, Spinner } from '@/components/ui';
 import { api } from '@/lib/api-client';
 import { VISUAL_STYLES, VISUAL_STYLE_LABELS } from '@/lib/domain';
@@ -23,12 +23,17 @@ export default function SetupPage() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    fetch('/api/health').then((r) => r.json()).then((j) => setHealth(j?.data)).catch(() => undefined);
+    fetch('/api/health')
+      .then((r) => r.json())
+      .then((j) => setHealth(j?.data))
+      .catch(() => undefined);
     api.get<{ voices: Voice[] }>('/api/voices').then((r) => {
       setVoices(r.voices);
       if (r.voices[0]) setVoiceId(r.voices[0].id);
     }).catch(() => undefined);
   }, []);
+
+  const warnings: string[] = health?.warnings ?? [];
 
   async function finish() {
     setSaving(true);
@@ -96,7 +101,21 @@ export default function SetupPage() {
       <Card>
         {!health ? (
           <Spinner label="Checking system…" />
-        ) : step === 0 ? (
+        ) : warnings.length > 0 ? (
+          <div className="mb-4 space-y-2">
+            {warnings.map((w) => (
+              <div
+                key={w}
+                className="flex items-start gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3"
+              >
+                <Info size={15} className="mt-0.5 shrink-0 text-amber-400" aria-hidden="true" />
+                <p className="text-xs leading-relaxed text-amber-100">{w}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {step === 0 ? (
           <>
             <h1 className="text-xl font-black text-white">Welcome to ShortForge AI</h1>
             <p className="mt-3 text-sm leading-relaxed text-ink-300">

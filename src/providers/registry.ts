@@ -5,7 +5,7 @@
  * code depends only on the interfaces in `./types`, so swapping (or adding) a
  * vendor never requires touching the pipeline.
  */
-import { config } from '@/lib/config';
+import { config, MOCK_MODE } from '@/lib/config';
 import { FFmpegRenderer } from './ffmpeg-renderer';
 import { MockImageProvider } from './mock';
 import { MockLLMProvider, MockVoiceProvider } from './mock';
@@ -27,17 +27,27 @@ import {
 } from './types';
 import path from 'node:path';
 
+/**
+ * Resolve the LLM provider.
+ *
+ * MOCK_MODE takes precedence over the presence of a key: demo mode must force
+ * demo providers even when credentials exist, otherwise setting MOCK_MODE=true
+ * would silently do nothing on a machine that has keys in .env.local.
+ */
 export function getLLM(): LLMProvider {
+  if (MOCK_MODE) return new MockLLMProvider();
   if (config.llm.configured) return new OpenAIProvider();
   return new MockLLMProvider();
 }
 
 export function getVoice(): VoiceProvider {
+  if (MOCK_MODE) return new MockVoiceProvider();
   if (config.voice.configured) return new ElevenLabsProvider();
   return new MockVoiceProvider();
 }
 
 export function getImage(): ImageProvider {
+  if (MOCK_MODE) return new MockImageProvider();
   if (config.replicate.configured) return new ReplicateProvider();
   return new MockImageProvider();
 }
@@ -56,6 +66,7 @@ export function getRenderer(): RendererProvider {
  * from the user that nothing is fact-checked.
  */
 export function getResearch(): ResearchProvider {
+  if (MOCK_MODE) return new MockLLMProvider();
   if (config.llm.configured) return new OpenAIProvider();
   return new MockLLMProvider();
 }

@@ -68,6 +68,30 @@ export async function GET() {
       ? 'degraded'
       : 'healthy';
 
+  // Actionable, credential-free guidance for whatever is limiting the user.
+  const warnings: string[] = [];
+  if (MOCK_MODE) {
+    warnings.push(
+      'Demo mode is active. Scripts, voices and visuals are synthetic; the video pipeline is real.',
+    );
+  }
+  if (health.openai === 'unhealthy' || health.openai === 'degraded') {
+    warnings.push(
+      'OpenAI is not usable: check the key, or that the account has remaining API credit.',
+    );
+  }
+  if (health.elevenlabs === 'unhealthy' || health.elevenlabs === 'degraded') {
+    warnings.push(
+      'ElevenLabs is not usable: the key must be the secret key (starts with sk_), not a key ID.',
+    );
+  }
+  if (health.replicate === 'unconfigured') {
+    warnings.push('Replicate is not set, so scene visuals are generated locally.');
+  }
+  if (health.youtube === 'unconfigured') {
+    warnings.push('YouTube publishing is disabled until OAuth credentials are set.');
+  }
+
   return NextResponse.json({
     success: true,
     data: {
@@ -77,6 +101,7 @@ export async function GET() {
       components: health,
       // Detailed strings are safe: no keys, no endpoints with credentials.
       details,
+      warnings,
     },
     error: null,
   });
